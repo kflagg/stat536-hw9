@@ -1,0 +1,109 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage,graphicx,float,amsmath,enumitem,hyperref}
+\setlist{parsep=5.5pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{\baselineskip}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{Time Series HW 8}
+\rhead{Andrea Mack and Kenny Flagg}
+\setlength{\headheight}{18pt}
+\setlength{\headsep}{2pt}
+
+\title{Time Series HW 9}
+\author{Andrea Mack, and Kenny Flagg}
+\date{December 7, 2016}
+
+\begin{document}
+\maketitle
+
+<<setup, echo = FALSE, message = FALSE, cache = FALSE>>=
+library(knitr)
+opts_chunk$set(echo = FALSE, comment = NA, fig.align = "center",
+               fig.width = 6.5, fig.height = 4, fig.pos = "H",
+               size = "footnotesize", dev = "pdf",
+               dev.args = list(pointsize = 11))
+knit_theme$set("print")
+
+library(xtable)
+options(xtable.table.placement = "H", xtable.caption.placement = "top",
+        width = 80, scipen = 1, show.signif.stars = FALSE)
+
+library(TSA)
+@
+
+{\it A record exists of the ice on and ice off dates for the Baikal Lake in Siberia from 1869 to 1996. We will focus on the duration of ice being present on the lake, which is a count of days for each year. There are no missing values in the time series.}
+
+{\it You can access this data set via:}
+<<data, echo = TRUE>>=
+bts <- read.csv("baikal.csv", header = TRUE)$Days
+@
+{\it Note that these are yearly observations and that the response is number of days of ice on the lake in each year. A researcher might be interested in finding some sort of long-term periodic behavior in these results as well as assessing evidence related to a trend.}
+
+\begin{enumerate}
+
+\item%1
+{\it Make a nice looking time series plot of the time series.}
+
+<<prob1>>=
+plot(bts ~ I(1869:1996), type = "l", main = "Nice-looking time series plot",
+     ylab = "Number of Days with Ice", xlab = "Year")
+@
+
+\item%2
+{\it Fit an ARMA(17,0) using the arima function and describe the roots discussing}
+\begin{enumerate}
+\item {\it stationarity and}
+\item {\it potential quasi-periodicities.}
+\end{enumerate}
+{\it To help with (b), you should make a table and sort the roots based on the potential QP.}
+
+<<prob2, results = 'asis'>>=
+bts.ar17 <- arima(bts, order = c(17, 0, 0))
+xtable(data.frame(Estimate = bts.ar17$coef, SE = sqrt(diag(bts.ar17$var.coef))))
+
+roots <- polyroot(c(1, -bts.ar17$coef[-18]))
+cat(roots, sep = "\n\n")
+# TODO: Find QP, sort, and make a table.
+@
+
+\item%3
+{\it One method for selecting the order of an ARMA model is to use hypothesis tests on the highest order coefficient and drop down if there is no evidence that the coefficients are different from 0. We can also use confidence intervals to do our test by assessing whether our value of interest under the null is inside or outside of the interval. Even though you are using a 95\% confidence interval, you are still doing a 5\% significance level test. The confint function can be used to generate confidence intervals for coefficients from many models in R, including arima-fit models. Fit an AR(18) model and use the confidence interval to discuss the need for the 18th lag in the model. Then repeat the confidence interval of interest for the previous AR(17) model and discuss the similar result -- what does this suggest about the AR(17) model.}
+
+\item%4
+{\it Report the estimate and 95\% confidence interval for the ``intercept'' that R reports for the AR(17) model. Interpret the estimate and then calculate the actual estimated intercept in the AR(17) model based on the results. Show your work.}
+
+\item%5
+{\it For the AR(17) model (do not re-fit the model), how many of the lower order autoregressive coefficients are not detectably different from 0 in this model using the confidence intervals?}
+
+\item%6
+{\it To explore long-term QP, you have to consider somewhat higher order AR() models. But sometimes we can get similar fits to the time series from mixed ARMA models. Report the ACF, PACF, and EACF and discuss models that are suggested by these results. We will discuss the PACF and EACF in class on Tuesday so bring questions to class on using them.}
+
+<<prob6>>=
+par(mfrow = c(1, 2))
+acf(bts)
+pacf(bts)
+eacf(bts)
+@
+
+\item%7
+{\it Consider taking a first difference in the series and repeating the diagnostics from \#6. Use the diff function to do the differencing.}
+
+<<prob7>>=
+par(mfrow = c(1, 2))
+dbts <- diff(bts)
+acf(dbts)
+pacf(dbts)
+eacf(dbts)
+@
+
+\item%8
+{\it This should suggest a particular MA model. Fit that model using arima on the differenced series. In other words, use \verb|arima(dbts, order = c(0, 0, q))| where you need to determine q. Write out the estimated model based on the model results both in terms of the differenced series and the original time series.}
+
+\item%9
+{\it Report the confidence interval for the intercept from the model in \#8. Discuss what the test using this confidence interval tells you in this model and how it addresses one of the questions of interest to the researcher.}
+
+\end{enumerate}
+
+\end{document}
