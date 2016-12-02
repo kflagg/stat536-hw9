@@ -36,6 +36,7 @@ library(TSA)
 {\it A record exists of the ice on and ice off dates for the Baikal Lake in Siberia from 1869 to 1996. We will focus on the duration of ice being present on the lake, which is a count of days for each year. There are no missing values in the time series.}
 
 {\it You can access this data set via:}
+
 <<data, echo = TRUE>>=
 bts <- read.csv("baikal.csv", header = TRUE)$Days
 @
@@ -69,13 +70,49 @@ cat(roots, sep = "\n\n")
 @
 
 \item%3
-{\it One method for selecting the order of an ARMA model is to use hypothesis tests on the highest order coefficient and drop down if there is no evidence that the coefficients are different from 0. We can also use confidence intervals to do our test by assessing whether our value of interest under the null is inside or outside of the interval. Even though you are using a 95\% confidence interval, you are still doing a 5\% significance level test. The confint function can be used to generate confidence intervals for coefficients from many models in R, including arima-fit models. Fit an AR(18) model and use the confidence interval to discuss the need for the 18th lag in the model. Then repeat the confidence interval of interest for the previous AR(17) model and discuss the similar result -- what does this suggest about the AR(17) model.}
+{\it One method for selecting the order of an ARMA model is to use hypothesis tests on the highest order coefficient and drop down if there is no evidence that the coefficients are different from 0. We can also use confidence intervals to do our test by assessing whether our value of interest under the null is inside or outside of the interval. Even though you are using a 95\% confidence interval, you are still doing a 5\% significance level test. The confint function can be used to generate confidence intervals for coefficients from many models in R, including arima-fit models. Fit an AR(18) model and use the confidence interval to discuss the need for the 18th lag in the model. Then repeat the confidence interval of interest for the previous AR(17) model and discuss the similar result -- what does this suggest about the AR(17) model?}
+
+<<prob3, results = 'asis'>>=
+
+bts.ar18 <- arima(bts, order = c(18, 0, 0))
+df18 <- data.frame(confint(bts.ar18)[18,])
+colnames(df18) <- "Limits AR(18)"
+print(xtable(df18))
+
+@
+
+Zero is within the 95\% confidence interval for the AR(18) term indicating no evidence that it is needed in the model.
+
+<<prob3x, results = 'asis'>>=
+df17 <- data.frame(confint(bts.ar17)[17,])
+colnames(df17) <- "Limits AR(17)"
+print(xtable(df17))
+@
+
+The entire 95\% confidence interval for the AR(17) term is above zero, indicating a strong evidence that the AR(17) term is positive.
 
 \item%4
 {\it Report the estimate and 95\% confidence interval for the ``intercept'' that R reports for the AR(17) model. Interpret the estimate and then calculate the actual estimated intercept in the AR(17) model based on the results. Show your work.}
 
+<<prob4, include = FALSE>>=
+df17_int <- data.frame(confint(bts.ar17)[18,])
+colnames(df17_int) <- "Limits AR(17) Intercept"
+print(xtable(df17_int))
+summary(bts.ar17)
+
+@
+
+The intercept in the AR(17) model is estimated to be 113.84 with a standard error of 5.54. The associated 95\% confidence interval is from \Sexpr{df17_int[1]} to \Sexpr{df17_int[2]} when an AR(17) model was fit.
+
+The average number of days ice was on Baikal Lake per year from 1869 to 1996 was estimated {\bf or population data?} to be 113.85 with an associated 95\% confidence interval of \Sexpr{df17_int[1]} to \Sexpr{df17_int[2]} days per year. The observed average number of days per year was 113.57, which is very similar to the model estimate.
+
+{\bf Check how to interpret ar coefficients. What does he mean by the actual estimated intercept vs. the estimate of the intercept? Why is this not Poisson?}
+
+
 \item%5
 {\it For the AR(17) model (do not re-fit the model), how many of the lower order autoregressive coefficients are not detectably different from 0 in this model using the confidence intervals?}
+
+Of the 16 lower order terms, 14 were not detectable different from 0.
 
 \item%6
 {\it To explore long-term QP, you have to consider somewhat higher order AR() models. But sometimes we can get similar fits to the time series from mixed ARMA models. Report the ACF, PACF, and EACF and discuss models that are suggested by these results. We will discuss the PACF and EACF in class on Tuesday so bring questions to class on using them.}
