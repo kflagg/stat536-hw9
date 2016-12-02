@@ -64,8 +64,12 @@ bts.ar17 <- arima(bts, order = c(17, 0, 0))
 xtable(data.frame(Estimate = bts.ar17$coef, SE = sqrt(diag(bts.ar17$var.coef))))
 
 roots <- polyroot(c(1, -bts.ar17$coef[-18]))
-cat(roots, sep = "\n\n")
-# TODO: Find QP, sort, and make a table.
+roots.frame <- data.frame(Root = format(roots, digits = 3),
+                          Modulus = Mod(roots),
+                          QP = ifelse(zapsmall(Im(roots)) == 0, NA,
+                                      2 * pi / abs(Arg(roots))))
+print(xtable(roots.frame[order(roots.frame$QP),], align = "lrrr"),
+      include.rownames = FALSE)
 @
 
 \item%3
@@ -76,6 +80,16 @@ cat(roots, sep = "\n\n")
 
 \item%5
 {\it For the AR(17) model (do not re-fit the model), how many of the lower order autoregressive coefficients are not detectably different from 0 in this model using the confidence intervals?}
+
+<<prob5, results = 'asis'>>=
+ci.ar17 <- data.frame(coef(bts.ar17), confint(bts.ar17))[-18,]
+colnames(ci.ar17) <- c("Estimate", "Lower 95% Limit", "Upper 95% Limit")
+
+# Find which rows have a CI that excludes 0.
+not0 <- which(ci.ar17$`Lower 95% Limit` > 0 | ci.ar17$`Upper 95% Limit` < 0)
+
+print(xtable(ci.ar17), add.to.row = list(as.list(not0 - 1), rep("\\bf ", length(not0))))
+@
 
 \item%6
 {\it To explore long-term QP, you have to consider somewhat higher order AR() models. But sometimes we can get similar fits to the time series from mixed ARMA models. Report the ACF, PACF, and EACF and discuss models that are suggested by these results. We will discuss the PACF and EACF in class on Tuesday so bring questions to class on using them.}
