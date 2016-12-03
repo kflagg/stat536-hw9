@@ -12,7 +12,7 @@
 \setlength{\headsep}{2pt}
 
 \title{Time Series HW 9}
-\author{Andrea Mack, and Kenny Flagg}
+\author{Andrea Mack and Kenny Flagg}
 \date{December 7, 2016}
 
 \begin{document}
@@ -69,9 +69,11 @@ roots.frame <- data.frame(Root = format(roots, digits = 3),
                           Modulus = Mod(roots),
                           QP = ifelse(zapsmall(Im(roots)) == 0, NA,
                                       2 * pi / abs(Arg(roots))))
-print(xtable(roots.frame[order(roots.frame$QP),], align = "lrrr"),
-      include.rownames = FALSE)
+print(xtable(roots.frame[rev(order(roots.frame$QP, na.last = FALSE)),],
+             align = "lrrr"), include.rownames = FALSE)
 @
+
+All of the roots have modulous $>$ 1, implying that the process is stationary. One root is real, and the remaining roots are complex and form 8 conjugate pairs. The process has components with quasi-periods of \Sexpr{signif(roots.frame$QP[12], 3)} and \Sexpr{roots.frame$QP[16]} years. {\bf Review interpretting QPs and deciding which ones are important.}
 
 \item%3
 {\it One method for selecting the order of an ARMA model is to use hypothesis tests on the highest order coefficient and drop down if there is no evidence that the coefficients are different from 0. We can also use confidence intervals to do our test by assessing whether our value of interest under the null is inside or outside of the interval. Even though you are using a 95\% confidence interval, you are still doing a 5\% significance level test. The confint function can be used to generate confidence intervals for coefficients from many models in R, including arima-fit models. Fit an AR(18) model and use the confidence interval to discuss the need for the 18th lag in the model. Then repeat the confidence interval of interest for the previous AR(17) model and discuss the similar result -- what does this suggest about the AR(17) model?}
@@ -107,7 +109,7 @@ The intercept in the AR(17) model is estimated to be 113.84 with a standard erro
 
 The average number of days ice was on Baikal Lake per year from 1869 to 1996 was estimated {\bf or population data?} to be 113.85 with an associated 95\% confidence interval of \Sexpr{df17_int[1,]} to \Sexpr{df17_int[2,]} days per year. The observed average number of days per year was 113.57, which is very similar to the model estimate.
 
-{\bf Check how to interpret ar coefficients. What does he mean by the actual estimated intercept vs. the estimate of the intercept? Why is this not Poisson?}
+{\bf Check how to interpret ar coefficients. What does he mean by the actual estimated intercept vs. the estimate of the intercept? Why is this not Poisson?} {\it I thinks he wanted us to figure out Poisson models on our own for the project...}
 
 
 \item%5
@@ -123,7 +125,7 @@ not0 <- which(ci.ar17$`Lower 95% Limit` > 0 | ci.ar17$`Upper 95% Limit` < 0)
 print(xtable(ci.ar17), add.to.row = list(as.list(not0 - 1), rep("\\bf ", length(not0))))
 @
 
-Of the 16 lower order terms, 14 were not detectably different from 0.
+Of the 16 lower order terms, 14 were not detectably different from 0. Those whose 95\% confidence intervals explude zero are bolded in the table above.
 
 \item%6
 {\it To explore long-term QP, you have to consider somewhat higher order AR() models. But sometimes we can get similar fits to the time series from mixed ARMA models. Report the ACF, PACF, and EACF and discuss models that are suggested by these results. We will discuss the PACF and EACF in class on Tuesday so bring questions to class on using them.}
