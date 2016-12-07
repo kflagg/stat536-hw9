@@ -61,7 +61,6 @@ plot(bts ~ I(1869:1996), type = "l", main = "Nice-looking time series plot",
 {\it To help with (b), you should make a table and sort the roots based on the potential QP.}
 
 <<prob2, results = "asis">>=
-
 # roots are found by setting 1-phi1x-phi2x^2-...-phipx^p = 0
 # modulus is the length of the slope of a line where x = real component and y = complex component
 
@@ -180,7 +179,7 @@ Altogether, we would suggest starting with an ARMA(2,0) model.
 <<prob7>>=
 par(mfrow = c(1, 2))
 dbts <- diff(bts)
-acf(dbts)
+TSA::acf(dbts)
 pacf(dbts)
 eacf(dbts)
 @
